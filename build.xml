@@ -1,0 +1,87 @@
+<project name="ConnectFour" basedir=".">
+  <!-- - - - - - - - - - - - - - - - - -
+            target: init
+    - - - - - - - - - - - - - - - - - -->
+  <target name="init">
+    <property name="workspace.dir" location="." />
+
+    <property name="build.dir" location="${workspace.dir}/bin" />
+    <property name="junit.jar" location="${basedir}/lib/junit-4.11.jar" />
+
+    <property name="src.dir" location="${workspace.dir}/src" />
+    <property name="src.tests.dir" location="${workspace.dir}/testsrc" />
+    <property name="dist.dir" location="${workspace.dir}/dist" />
+
+    <property name="testing.data.dir" location="${workspace.dir}/testing" />
+
+    <property name="test.data.dir" location="${testing.data.dir}/test_data" />
+    <property name="reports.test.html" location="${testing.data.dir}/test_reports_html" />
+    <tstamp/>
+  </target>
+
+  <!-- =================================
+          target: clean
+       ================================= -->
+  <target name="clean" depends="init" description="Delete all generated content.">
+    <delete dir="${build.dir}" />
+    <mkdir dir="${build.dir}" />
+  </target>
+
+  <!-- =================================
+          target: compile
+       ================================= -->
+  <target name="compile" depends="clean" description="Compile project.">
+    <javac includeantruntime="false"
+           destdir="${build.dir}"
+           classpath="${junit.jar}">
+      <src path="src" />
+      <src path="testsrc" />
+    </javac>
+  </target>
+
+  <!-- =================================
+          target: runapp
+       ================================= -->
+  <target name="runapp" depends="compile" description="Run app.">
+    <java fork="true" classpath="${build.dir}" classname="edu.nyu.pqs.connectfour.ConnectFourApp">
+    </java>
+  </target>
+
+  <!-- =================================
+            target: runtests
+       ================================= -->
+  <target name="runtests" depends="compile,dist" description="--> Runs Unit Tests">
+
+    <delete dir="${test.data.dir}" />
+    <mkdir dir="${test.data.dir}" />
+
+    <junit printsummary="yes" haltonfailure="no">
+      <classpath>
+        <pathelement location="${build.dir}" />
+        <pathelement path="${junit.jar}" />
+      </classpath>
+
+      <batchtest fork="yes" todir="${test.data.dir}">
+        <formatter type="xml"/>
+        <fileset dir="${src.tests.dir}">
+          <include name="**/*Test*.java"/>
+          <exclude name="**/AllTests.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <junitreport todir="${test.data.dir}">
+      <fileset dir="${test.data.dir}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${reports.test.html}" />
+    </junitreport>
+  </target>
+
+  <!-- =================================
+        target: dist
+       ================================= -->
+  <target name="dist" depends="init,clean,compile" description="Create distribution jarfile.">
+    <jar jarfile="${dist.dir}/connect-four-${DSTAMP}.jar" basedir="${build.dir}"/>
+  </target>
+</project>

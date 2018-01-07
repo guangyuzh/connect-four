@@ -1,0 +1,6 @@
+# Compiled classes
+*.class
+.idea/
+.DS_Store
+dist/
+testing/
